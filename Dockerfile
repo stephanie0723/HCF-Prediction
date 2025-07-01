@@ -21,7 +21,7 @@ RUN pip install --no-cache-dir --upgrade pip \
     && pip install --no-cache-dir -r requirements.txt
 
 # 复制项目文件
-COPY HCF_Prediction/pythonProject2/ ./
+COPY HCF_Prediction/HCF_Prediction/pythonProject2/ ./
 
 # 确保模型文件存在
 RUN ls -la *.pkl || echo "警告：未找到模型文件"
