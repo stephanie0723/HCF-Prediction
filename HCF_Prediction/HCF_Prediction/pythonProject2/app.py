@@ -379,4 +379,7 @@ def predict_batch():
         return jsonify({'error': f'处理请求时出现错误: {str(e)}'}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    # 支持云端部署的动态端口
+    port = int(os.environ.get('PORT', 5000))
+    # 绑定到0.0.0.0以便外部访问
+    app.run(host='0.0.0.0', port=port, debug=False)
