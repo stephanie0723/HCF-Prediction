@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>钢材高周疲劳预测</title>
+    <!-- 引入Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- 引入Bootstrap图标库 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        /* 添加一些自定义样式 */
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 50px 0;
+        }
+
+        /* .container {
+            margin-top: 0px;
+            padding: 30px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        } */
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        .submit-button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        .submit-button:hover {
+            background-color: #0056b3;
+        }
+
+        .result {
+            margin-top: 20px;
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+        }
+
+        .result p {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .form-control:focus {
+            box-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
+            border-color: #007bff;
+        }
+
+        .back-button {
+            background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
+            border: none;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            margin-bottom: 30px;
+        }
+
+        .back-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            color: white;
+        }
+
+        .home-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            margin-bottom: 30px;
+            margin-left: 15px;
+        }
+
+        .home-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            color: white;
+        }
+
+        .breadcrumb-nav {
+            margin-bottom: 30px;
+        }
+
+        .breadcrumb-nav .breadcrumb {
+            background: transparent;
+            margin-bottom: 0;
+        }
+
+        .breadcrumb-nav .breadcrumb-item a {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .breadcrumb-nav .breadcrumb-item a:hover {
+            color: #764ba2;
+        }
+
+        .upload-container {
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            padding: 60px;
+            backdrop-filter: blur(10px);
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        /* 鼠标悬浮可点击放大效果 */
+        .enlargeable {
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .enlargeable:hover {
+            transform: scale(1.02);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="upload-container">
+            <!-- 返回按钮 -->
+            <button class="back-button" onclick="goBack()">
+                <i class="bi bi-arrow-left"></i> 返回上级
+            </button>
+            <button class="home-button" onclick="goHome()">
+                <i class="bi bi-house"></i> 返回首页
+            </button>
+
+            <!-- 面包屑导航 -->
+            <nav aria-label="breadcrumb" class="breadcrumb-nav">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a href="/">首页</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="/material/steel_hcf">钢材高周疲劳预测</a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">单独上传数据</li>
+                </ol>
+            </nav>
+
+            <h1>钢材高周疲劳预测</h1>
+            <form id="prediction-form">
+                <div class="form-group">
+                    <label for="C">C(碳含量):</label>
+                    <input type="number" id="C" name="C" class="form-control" step="any" required>
+                </div>
+                <div class="form-group">
+                    <label for="P">P(磷含量):</label>
+                    <input type="number" id="P" name="P" class="form-control" step="any" required>
+                </div>
+                <div class="form-group">
+                    <label for="S">S(硫含量):</label>
+                    <input type="number" id="S" name="S" class="form-control" step="any" required>
+                </div>
+                <div class="form-group">
+                    <label for="YS">YS(屈服强度):</label>
+                    <input type="number" id="YS" name="YS" class="form-control" step="any" required>
+                </div>
+                <div class="form-group">
+                    <label for="UTS">UTS(抗拉强度):</label>
+                    <input type="number" id="UTS" name="UTS" class="form-control" step="any" required>
+                </div>
+                <div class="form-group">
+                    <label for="Brinell">Brinell(布氏硬度):</label>
+                    <input type="number" id="Brinell" name="Brinell" class="form-control" step="any" required>
+                </div>
+                <div class="form-group">
+                    <label for="Elongation">Elongation(延伸率):</label>
+                    <input type="number" id="Elongation" name="Elongation" class="form-control" step="any" required>
+                </div>
+                <button type="submit" class="submit-button">提交</button>
+            </form>
+
+            <div class="result" id="prediction-result">
+                <p>疲劳极限: <span id="fatigue-limit"></span></p>
+                <p>疲劳极限（log₁₀）: <span id="fatigue-log"></span></p>
+                <p>SRI: <span id="SRI"></span></p>
+                
+                <!-- S-N曲线图像显示区域 -->
+                <div style="margin-top: 30px;">
+                    <h3 style="text-align: center; margin-bottom: 20px;">S-N疲劳寿命曲线</h3>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <img id="sn-curve-log" style="width: 100%; display: none; border: 1px solid #ddd; border-radius: 5px;" alt="S-N曲线（对数坐标）">
+                        </div>
+                        <div class="col-md-6">
+                            <img id="sn-curve-linear" style="width: 100%; display: none; border: 1px solid #ddd; border-radius: 5px;" alt="S-N曲线（线性坐标）">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 引入Bootstrap JS和Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+    <script>
+        function goBack() {
+            window.location.href = '/material/steel_hcf';
+        }
+
+        function goHome() {
+            window.location.href = '/';
+        }
+
+        document.getElementById("prediction-form").addEventListener("submit", function (event) {
+            event.preventDefault();
+
+            // 获取用户输入的特征
+            var C = document.getElementById("C").value;
+            var P = document.getElementById("P").value;
+            var S = document.getElementById("S").value;
+            var YS = document.getElementById("YS").value;
+            var UTS = document.getElementById("UTS").value;
+            var Brinell = document.getElementById("Brinell").value;
+            var Elongation = document.getElementById("Elongation").value;
+
+            // 构建请求体（只发送用于预测的5个特征）
+            var data = {
+                "C": parseFloat(C),
+                "P": parseFloat(P),
+                "S": parseFloat(S),
+                "YS": parseFloat(YS),
+                "UTS": parseFloat(UTS)
+                // Brinell和Elongation不发送到后端，因为不参与计算
+            };
+
+            // 发送POST请求到Flask后台
+            fetch("http://127.0.0.1:5000/predict", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(data)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    const fatigue = data.fatigue_limit;
+                    const fatigueLog = Math.log10(fatigue);
+                    // 显示预测结果
+                    document.getElementById("fatigue-limit").innerText = data.fatigue_limit.toFixed(2);
+                    document.getElementById("fatigue-log").innerText = isFinite(fatigueLog) ? fatigueLog.toFixed(4) : "无效值";
+                    document.getElementById("SRI").innerText = data.SRI.toFixed(2);
+                    document.getElementById("prediction-result").style.display = 'block';
+
+                    return fetch("http://127.0.0.1:5000/sn_curve", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ sri: data.SRI, fatigue: data.fatigue_limit })
+                    });
+                })
+                .then(response => response.json())
+                .then(imageData => {
+                    const img1 = document.getElementById("sn-curve-log");
+                    const img2 = document.getElementById("sn-curve-linear");
+
+                    img1.src = "data:image/png;base64," + imageData.log_plot;
+                    img2.src = "data:image/png;base64," + imageData.linear_plot;
+
+                    // 添加可放大查看功能
+                    [img1, img2].forEach(img => img.classList.add('enlargeable'));
+
+                    // 绑定点击事件
+                    [img1, img2].forEach(img => {
+                        img.onclick = function () {
+                            const modalImg = document.getElementById('modalImage');
+                            modalImg.src = this.src;
+                            const myModal = new bootstrap.Modal(document.getElementById('imageModal'));
+                            myModal.show();
+                        };
+                    });
+
+                    img1.style.display = "block";
+                    img2.style.display = "block";
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    alert("出现错误，请稍后再试！");
+                });
+        });
+
+        // -------- Modal 图片缩放与拖动功能 --------
+        function initImageZoomAndDrag() {
+            console.log('初始化图片缩放拖动功能...');
+            
+            const modalEl = document.getElementById('imageModal');
+            const modalImg = document.getElementById('modalImage');
+            
+            if (!modalEl || !modalImg) {
+                console.error('找不到 Modal 元素');
+                return;
+            }
+            
+            console.log('Modal 元素找到，开始绑定事件...');
+            
+            let scale = 1;
+            let isDragging = false;
+            let startPos = { x: 0, y: 0 };
+            let translate = { x: 0, y: 0 };
+            let currentTranslate = { x: 0, y: 0 };
+
+            const updateTransform = () => {
+                modalImg.style.transform = `translate(${translate.x}px, ${translate.y}px) scale(${scale})`;
+            };
+
+            // 重置函数
+            const resetZoom = () => {
+                scale = 1;
+                translate = { x: 0, y: 0 };
+                currentTranslate = { x: 0, y: 0 };
+                updateTransform();
+                modalImg.style.cursor = 'grab';
+            };
+
+            // Modal 打开时重置
+            modalEl.addEventListener('show.bs.modal', resetZoom);
+
+            // 滚轮缩放 - 绑定到整个 modal 区域
+            modalEl.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const step = 0.15;
+                const oldScale = scale;
+                
+                if (e.deltaY < 0) {
+                    scale = Math.min(scale + step, 4);
+                } else {
+                    scale = Math.max(scale - step, 0.3);
+                }
+                
+                console.log(`缩放：${oldScale} -> ${scale}`);
+                
+                // 如果缩放到原始大小，重置位置
+                if (scale <= 1) {
+                    scale = 1;
+                    translate = { x: 0, y: 0 };
+                    currentTranslate = { x: 0, y: 0 };
+                }
+                
+                updateTransform();
+            });
+
+            // 拖动功能
+            modalImg.addEventListener('mousedown', (e) => {
+                if (scale <= 1) return;
+                e.preventDefault();
+                isDragging = true;
+                startPos = { x: e.clientX, y: e.clientY };
+                currentTranslate = { ...translate };
+                modalImg.style.cursor = 'grabbing';
+                modalImg.style.transition = 'none';
+                console.log('开始拖动');
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                const dx = e.clientX - startPos.x;
+                const dy = e.clientY - startPos.y;
+                translate.x = currentTranslate.x + dx;
+                translate.y = currentTranslate.y + dy;
+                updateTransform();
+            });
+
+            document.addEventListener('mouseup', () => {
+                if (!isDragging) return;
+                isDragging = false;
+                modalImg.style.cursor = 'grab';
+                modalImg.style.transition = 'transform 0.2s ease';
+                console.log('结束拖动');
+            });
+
+            // 初始样式
+            modalImg.style.cursor = 'grab';
+            modalImg.style.transition = 'transform 0.2s ease';
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', initImageZoomAndDrag);
+    </script>
+
+    <!-- 图片放大 Modal -->
+    <div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true" data-bs-backdrop="true" data-bs-keyboard="true">
+        <div class="modal-dialog modal-dialog-centered modal-fullscreen-lg-down" style="max-width: 95vw; max-height: 95vh;">
+            <div class="modal-content bg-transparent border-0" style="overflow: hidden; height: 90vh;">
+                <!-- 关闭按钮 -->
+                <button type="button" class="btn-close btn-close-white position-absolute" style="top: 15px; right: 15px; z-index: 1050;" data-bs-dismiss="modal" aria-label="关闭"></button>
+                
+                <div class="modal-body p-0 d-flex justify-content-center align-items-center" style="height: 100%;">
+                    <img id="modalImage" src="" style="max-width: 100%; max-height: 100%; object-fit: contain;" class="rounded" alt="放大查看">
+                </div>
+                
+                <!-- 提示文字 -->
+                <div class="position-absolute bottom-0 start-50 translate-middle-x text-white text-center" style="z-index: 1050; margin-bottom: 20px;">
+                    <small>滚轮缩放 | 拖拽移动 | 点击背景或按ESC关闭</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

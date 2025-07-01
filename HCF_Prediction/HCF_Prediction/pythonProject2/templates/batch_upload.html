@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ material_name }} - 批量上传数据</title>
+    <!-- 引入Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- 引入图标库 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 50px 0;
+        }
+
+        .upload-container {
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            padding: 60px;
+            backdrop-filter: blur(10px);
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .page-title {
+            text-align: center;
+            color: #2c3e50;
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .page-subtitle {
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 1.1rem;
+            margin-bottom: 50px;
+        }
+
+        .breadcrumb-nav {
+            background: transparent;
+            margin-bottom: 30px;
+        }
+
+        .breadcrumb-nav .breadcrumb-item a {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .breadcrumb-nav .breadcrumb-item a:hover {
+            color: #764ba2;
+        }
+
+        .back-button {
+            background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
+            border: none;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            margin-bottom: 30px;
+        }
+
+        .back-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            color: white;
+        }
+
+        .home-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            margin-bottom: 30px;
+            margin-left: 15px;
+        }
+
+        .home-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            color: white;
+        }
+
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 60px 30px;
+            text-align: center;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-area:hover {
+            border-color: #764ba2;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%);
+            transform: translateY(-5px);
+        }
+
+        .upload-area.dragover {
+            border-color: #f5576c;
+            background: linear-gradient(135deg, rgba(245, 87, 108, 0.2) 0%, rgba(240, 147, 251, 0.2) 100%);
+        }
+
+        .upload-icon {
+            font-size: 5rem;
+            color: #667eea;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .upload-area:hover .upload-icon {
+            color: #764ba2;
+            transform: scale(1.1);
+        }
+
+        .upload-text {
+            color: #2c3e50;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .upload-hint {
+            color: #7f8c8d;
+            font-size: 1rem;
+            margin-bottom: 30px;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .upload-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            padding: 15px 40px;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .upload-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            color: white;
+        }
+
+        .file-info {
+            display: none;
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            text-align: left;
+        }
+
+        .file-info h5 {
+            margin-bottom: 15px;
+        }
+
+
+
+        .format-requirements {
+            background: rgba(241, 196, 15, 0.1);
+            border-left: 4px solid #f1c40f;
+            padding: 20px;
+            margin-top: 30px;
+            border-radius: 0 10px 10px 0;
+        }
+
+        .format-requirements h5 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        .format-requirements ul {
+            color: #7f8c8d;
+            margin-bottom: 0;
+        }
+
+        .submit-button {
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+            border: none;
+            color: white;
+            padding: 15px 40px;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 30px;
+            display: none;
+        }
+
+        .submit-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            color: white;
+        }
+
+        .submit-button:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        @media (max-width: 768px) {
+            .page-title {
+                font-size: 2rem;
+            }
+            
+            .upload-container {
+                padding: 40px 20px;
+                margin: 20px;
+            }
+            
+            .upload-area {
+                padding: 40px 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="upload-container">
+            <!-- 返回按钮 -->
+            <button class="back-button" onclick="goBack()">
+                <i class="bi bi-arrow-left"></i> 返回上级
+            </button>
+            <button class="home-button" onclick="goHome()">
+                <i class="bi bi-house"></i> 返回首页
+            </button>
+
+            <!-- 面包屑导航 -->
+            <nav aria-label="breadcrumb" class="breadcrumb-nav">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a href="/">首页</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="/material/{{ material_type }}">{{ material_name }}</a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">批量上传数据</li>
+                </ol>
+            </nav>
+
+            <!-- 页面标题 -->
+            <h1 class="page-title">{{ material_name }}</h1>
+            <p class="page-subtitle">批量数据预测 - Excel文件上传</p>
+
+            <!-- 文件上传区域 -->
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">
+                    <i class="bi bi-cloud-upload"></i>
+                </div>
+                <div class="upload-text">点击或拖拽文件到此处</div>
+                <div class="upload-hint">支持 .xlsx, .xls 格式文件，最大支持10MB</div>
+                <button class="upload-button" onclick="triggerFileInput()">
+                    <i class="bi bi-file-earmark-spreadsheet"></i> 选择Excel文件
+                </button>
+                <input type="file" id="fileInput" class="file-input" accept=".xlsx,.xls" onchange="handleFileSelect(event)">
+            </div>
+
+            <!-- 文件信息显示 -->
+            <div class="file-info" id="fileInfo">
+                <h5><i class="bi bi-file-check"></i> 文件已选择</h5>
+                <p><strong>文件名:</strong> <span id="fileName"></span></p>
+                <p><strong>文件大小:</strong> <span id="fileSize"></span></p>
+            </div>
+
+            <!-- 提交按钮 -->
+            <button class="submit-button" id="submitButton" onclick="uploadFile()">
+                <i class="bi bi-upload"></i> 开始预测分析
+            </button>
+
+            <!-- 预测结果摘要 -->
+            <div class="result-summary" id="resultSummary" style="display: none; background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%); color: white; padding: 20px; border-radius: 10px; margin-top: 20px; text-align: center;">
+                <h5><i class="bi bi-check-circle"></i> 预测完成</h5>
+                <p style="margin: 10px 0;"><strong>总样本数：</strong> <span id="totalSamples"></span></p>
+                <p style="margin: 10px 0;">预测结果文件已自动下载。</p>
+            </div>
+
+
+
+            <!-- 格式要求说明 -->
+            <div class="format-requirements">
+                <h5><i class="bi bi-info-circle"></i> 数据格式要求</h5>
+                <ul>
+                    <li>Excel文件必须包含<strong>7列</strong>数据，按顺序为：
+                        <ul style="margin-top: 10px;">
+                            <li><strong>第1列：C</strong>（碳含量）</li>
+                            <li><strong>第2列：P</strong>（磷含量）</li>
+                            <li><strong>第3列：S</strong>（硫含量）</li>
+                            <li><strong>第4列：YS</strong>（屈服强度）</li>
+                            <li><strong>第5列：UTS</strong>（抗拉强度）</li>
+                            <li><strong>第6列：Brinell</strong>（布氏硬度）</li>
+                            <li><strong>第7列：Elongation</strong>（延伸率）</li>
+                        </ul>
+                    </li>
+                    <li>所有列数据必须为数字格式，不能包含文字或特殊字符</li>
+                    <li>第一行可以为列标题，数据从第二行开始</li>
+                    <li>最多支持1000行数据</li>
+                    <li>输出文件会保留原有7列，并在第8、9、10列添加预测结果：
+                        <ul style="margin-top: 5px;">
+                            <li>第8列：疲劳极限（预测值）</li>
+                            <li>第9列：疲劳极限(log10)</li>
+                            <li>第10列：SRI(MPa)</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- 引入Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        let selectedFile = null;
+
+        function triggerFileInput() {
+            document.getElementById('fileInput').click();
+        }
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                selectedFile = file;
+                showFileInfo(file);
+            }
+        }
+
+        function showFileInfo(file) {
+            const fileInfo = document.getElementById('fileInfo');
+            const fileName = document.getElementById('fileName');
+            const fileSize = document.getElementById('fileSize');
+            const submitButton = document.getElementById('submitButton');
+
+            fileName.textContent = file.name;
+            fileSize.textContent = formatFileSize(file.size);
+
+            fileInfo.style.display = 'block';
+            submitButton.style.display = 'block';
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function uploadFile() {
+            if (!selectedFile) {
+                alert('请先选择文件');
+                return;
+            }
+
+            const submitButton = document.getElementById('submitButton');
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<i class="bi bi-arrow-clockwise"></i> 预测中...';
+
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+            formData.append('material_type', '{{ material_type }}');
+
+            fetch('/predict_batch', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (response.ok && response.headers.get('content-type')?.includes('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')) {
+                    // 获取总样本数
+                    const totalSamples = response.headers.get('X-Total-Samples') || '0';
+                    
+                    // 如果是Excel文件响应，直接下载
+                    return response.blob().then(blob => {
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = '批量预测结果.xlsx';
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        window.URL.revokeObjectURL(url);
+                        
+                        // 显示预测结果摘要
+                        showResultSummary(totalSamples);
+                        
+                        submitButton.disabled = false;
+                        submitButton.innerHTML = '<i class="bi bi-upload"></i> 开始预测分析';
+                    });
+                } else {
+                    // 如果是JSON错误响应
+                    return response.json().then(data => {
+                        throw new Error(data.error || '处理失败');
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                submitButton.disabled = false;
+                submitButton.innerHTML = '<i class="bi bi-upload"></i> 开始预测分析';
+                alert('错误：' + error.message);
+            });
+        }
+
+
+
+        function showResultSummary(totalSamples) {
+            document.getElementById('totalSamples').textContent = totalSamples;
+            document.getElementById('resultSummary').style.display = 'block';
+            
+            // 滚动到结果区域
+            document.getElementById('resultSummary').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function goBack() {
+            window.location.href = '/material/{{ material_type }}';
+        }
+
+        function goHome() {
+            window.location.href = '/';
+        }
+
+        // 拖拽上传功能
+        const uploadArea = document.getElementById('uploadArea');
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                const file = files[0];
+                if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+                    selectedFile = file;
+                    showFileInfo(file);
+                } else {
+                    alert('请选择Excel文件（.xlsx或.xls格式）');
+                }
+            }
+        });
+    </script>
+</body>
+</html> 
